@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUNA carte｜月次カードジェネレーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #162236;
+    --navy-light: #1e3352;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --silver: #b8c4d0;
+    --silver-light: #dce6f0;
+    --white: #f9f5ee;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #09131e;
+    font-family: 'Noto Serif JP', serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+  }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: 340px 420px;
+    gap: 24px;
+    max-width: 800px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  /* ======= 入力パネル ======= */
+  .panel {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 20px 20px 24px;
+    position: sticky;
+    top: 24px;
+  }
+  .panel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    opacity: 0.8;
+  }
+  .panel-sub {
+    font-size: 9px;
+    color: var(--silver);
+    opacity: 0.5;
+    letter-spacing: 1px;
+    font-weight: 200;
+    margin-bottom: 16px;
+  }
+  .field { margin-bottom: 11px; }
+  .field label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--silver);
+    opacity: 0.7;
+    margin-bottom: 5px;
+    font-weight: 200;
+  }
+  .field input:not([type="checkbox"]), .field select {
+    width: 100%;
+    background: rgba(13,27,42,0.7);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--white);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 12px;
+    font-weight: 200;
+    padding: 7px 10px;
+    outline: none;
+    letter-spacing: 1px;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+    transition: border-color 0.15s;
+  }
+  .field input:not([type="checkbox"])::placeholder { color: rgba(184,196,208,0.3); }
+  .field input:not([type="checkbox"]):focus,
+  .field select:focus { border-color: rgba(201,168,76,0.5); }
+  .field input[type="checkbox"] {
+    width: 13px; height: 13px;
+    cursor: pointer;
+    accent-color: var(--gold);
+    flex-shrink: 0;
+  }
+  .field select option { background: var(--navy-mid); }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .divider { height: 1px; background: rgba(201,168,76,0.12); margin: 14px 0; }
+  .field-sub-label {
+    font-size: 9px; letter-spacing: 2px; color: var(--gold); opacity: 0.55;
+    margin-bottom: 8px; font-family: 'Cormorant Garamond', serif; text-transform: uppercase;
+  }
+  .check-group { display: flex; flex-direction: column; gap: 6px; }
+  .check-label {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 10px; color: var(--silver); font-weight: 200; letter-spacing: 0.5px;
+  }
+
+  .png-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 13px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    transition: background 0.2s;
+    border-radius: 0;
+  }
+  .png-btn:hover { background: rgba(201,168,76,0.22); }
+  .png-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ======= 右：プレビュー ======= */
+  .preview-label {
+    font-size: 9px; letter-spacing: 3px; color: var(--silver); opacity: 0.4;
+    text-transform: uppercase; font-family: 'Cormorant Garamond', serif; margin-bottom: 8px;
+  }
+
+  /* ======= カード ======= */
+  .card {
+    width: 420px;
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .deco-circle {
+    position: absolute; top: -70px; right: -70px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(201,168,76,0.07), transparent 70%);
+    pointer-events: none;
+  }
+  .deco-ring {
+    position: absolute; top: -90px; right: -90px;
+    width: 260px; height: 260px; border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.1);
+    pointer-events: none;
+  }
+  .crescent {
+    position: absolute; top: 20px; right: 22px;
+    width: 22px; height: 22px; opacity: 0.45;
+  }
+
+  .card-header {
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    position: relative;
+  }
+  .month-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10px; letter-spacing: 4px; color: var(--gold); opacity: 0.8;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .card-main-title { font-size: 18px; font-weight: 200; color: var(--white); letter-spacing: 3px; }
+  .card-main-title span { color: var(--gold-light); font-weight: 300; }
+  .recipient-name { margin-top: 8px; font-size: 12px; color: var(--silver); letter-spacing: 2px; font-weight: 200; }
+  .recipient-name strong { color: var(--white); font-weight: 300; }
+
+  .gold-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold-light) 50%, var(--gold) 70%, transparent);
+    opacity: 0.5;
+  }
+  .block-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 9px; letter-spacing: 4px; color: var(--gold); opacity: 0.6;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+
+  /* プランブロック */
+  .plan-block { padding: 16px 28px; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .plan-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .plan-name-text { font-size: 13px; font-weight: 300; color: var(--white); letter-spacing: 1.5px; }
+  .plan-amount-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 300; color: var(--gold-light); letter-spacing: 1px;
+  }
+  .plan-amount-unit { font-size: 10px; color: var(--silver); margin-left: 3px; font-weight: 200; }
+
+  /* 納品ブロック */
+  .delivery-block { padding: 14px 28px; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .delivery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .delivery-item {
+    background: rgba(13,27,42,0.5);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 9px 12px;
+  }
+  .di-label {
+    font-size: 8px; letter-spacing: 2px; color: var(--silver); opacity: 0.6;
+    margin-bottom: 4px; font-family: 'Cormorant Garamond', serif; text-transform: uppercase;
+  }
+  .di-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px; font-weight: 300; color: var(--white); line-height: 1;
+  }
+  .di-val.hi { color: var(--gold-light); }
+  .di-val span { font-size: 10px; color: var(--silver); font-family: 'Noto Serif JP', serif; font-weight: 200; margin-left: 2px; }
+
+  /* 発注リマインダー */
+  .reminder-block {
+    padding: 14px 28px; border-bottom: 1px solid rgba(201,168,76,0.1);
+    background: rgba(201,168,76,0.04);
+  }
+  .reminder-text { font-size: 11px; color: var(--silver-light); line-height: 1.9; font-weight: 200; letter-spacing: 0.5px; }
+  .reminder-text strong { color: var(--gold-light); font-weight: 300; }
+  .reminder-example {
+    margin-top: 8px;
+    background: rgba(13,27,42,0.5);
+    border-left: 2px solid rgba(201,168,76,0.3);
+    padding: 6px 10px;
+    font-size: 10px; color: var(--silver); opacity: 0.75;
+    line-height: 1.9; font-weight: 200; letter-spacing: 0.5px;
+  }
+
+  /* 決済ブロック */
+  .payment-block {
+    padding: 14px 28px; border-bottom: 1px solid rgba(201,168,76,0.1);
+    background: rgba(13,27,42,0.3);
+  }
+  .payment-text { font-size: 11px; color: var(--silver-light); line-height: 1.9; font-weight: 200; letter-spacing: 0.5px; }
+  .payment-text strong { color: var(--gold-light); font-weight: 300; }
+  .payment-note { margin-top: 6px; font-size: 9px; color: var(--silver); opacity: 0.55; letter-spacing: 0.5px; font-weight: 200; line-height: 1.8; }
+
+  /* アップセルブロック */
+  .upsell-block { padding: 12px 28px 16px; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .upsell-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(184,196,208,0.07); }
+  .upsell-item:last-child { border-bottom: none; }
+  .upsell-tag {
+    font-family: 'Cormorant Garamond', serif; font-size: 8px; letter-spacing: 2px;
+    color: var(--gold); border: 1px solid rgba(201,168,76,0.3);
+    padding: 2px 6px; white-space: nowrap; margin-top: 2px; text-transform: uppercase;
+  }
+  .upsell-text { font-size: 10px; color: var(--silver); line-height: 1.8; font-weight: 200; letter-spacing: 0.5px; }
+  .upsell-text strong { color: var(--white); font-weight: 300; }
+
+  /* フッター */
+  .card-footer { padding: 12px 28px 20px; text-align: center; }
+  .footer-brand {
+    font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 300;
+    letter-spacing: 6px; color: var(--gold); opacity: 0.65;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .footer-copy { font-size: 8px; color: var(--silver); opacity: 0.35; letter-spacing: 1.5px; font-weight: 200; }
+</style>
+</head>
+<body>
+<div class="workspace">
+
+  <!-- 左：入力パネル -->
+  <div class="panel">
+    <div class="panel-title">Monthly Card Generator</div>
+    <div class="panel-sub">翌月継続案内カード · 入力と同時に反映</div>
+
+    <div class="field">
+      <label>対象月</label>
+      <input type="text" id="inp_month" placeholder="例）2026.04" value="2026.04">
+    </div>
+    <div class="field">
+      <label>源氏名</label>
+      <input type="text" id="inp_name" placeholder="例）ことね">
+    </div>
+
+    <div class="divider"></div>
+    <div class="field-sub-label">プラン情報</div>
+
+    <div class="field">
+      <label>プラン名</label>
+      <select id="inp_plan">
+        <option value="声紋カルテ　基本プラン">声紋カルテ　基本プラン（7,800円）</option>
+        <option value="声紋カルテ　スタンダード">声紋カルテ　スタンダード（25,000円）</option>
+        <option value="声紋カルテ　プレミアム">声紋カルテ　プレミアム（40,000円）</option>
+        <option value="ペルソナ設計　エントリー">ペルソナ設計　エントリー（50,000円）</option>
+        <option value="ペルソナ設計　プロ">ペルソナ設計　プロ（80,000円）</option>
+        <option value="ペルソナ設計　エグゼクティブ">ペルソナ設計　エグゼクティブ（120,000円）</option>
+      </select>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>金額（円）</label>
+        <input type="text" id="inp_amount" placeholder="7,800" value="7,800">
+      </div>
+      <div class="field">
+        <label>翌月納品本数</label>
+        <input type="text" id="inp_next_count" placeholder="8" value="8">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>今月の残枠（本）</label>
+      <input type="text" id="inp_remain" placeholder="3">
+    </div>
+
+    <div class="divider"></div>
+    <div class="field-sub-label">決済方法</div>
+    <div class="field">
+      <select id="inp_payment">
+        <option value="paypay">PayPay</option>
+        <option value="stripe">クレジットカード（Stripe）</option>
+        <option value="both">両方記載</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+    <div class="field-sub-label">表示するアップセル</div>
+    <div class="field">
+      <div class="check-group">
+        <label class="check-label">
+          <input type="checkbox" id="up_wishlist" checked>
+          おねだりリスト（＋2,000円〜）
+        </label>
+        <label class="check-label">
+          <input type="checkbox" id="up_upgrade" checked>
+          上位プランへのアップグレード
+        </label>
+        <label class="check-label">
+          <input type="checkbox" id="up_sns" checked>
+          SNS投稿文オプション
+        </label>
+        <label class="check-label">
+          <input type="checkbox" id="up_referral">
+          お友達紹介プランの案内
+        </label>
+      </div>
+    </div>
+
+    <button class="png-btn" id="pngBtn" onclick="savePng()">PNG 保存</button>
+  </div>
+
+  <!-- 右：カードプレビュー -->
+  <div class="preview-col">
+    <div class="preview-label">▼ Live Preview — 入力と同時に更新</div>
+    <div class="card" id="card">
+      <div class="deco-circle"></div>
+      <div class="deco-ring"></div>
+      <svg class="crescent" viewBox="0 0 40 40" fill="none">
+        <path d="M28 8C22 10 18 16 18 22C18 28 22 34 28 36C22 38 14 34 10 28C6 22 8 14 14 10C18 7 24 7 28 8Z" fill="#c9a84c" opacity="0.7"/>
+      </svg>
+
+      <div class="card-header">
+        <div class="month-label" id="c_month">LUNA carte — 2026.04 Monthly</div>
+        <div class="card-main-title">翌月<span>継続</span>のご案内</div>
+        <div class="recipient-name"><strong id="c_name">◯◯</strong> さま</div>
+      </div>
+      <div class="gold-line"></div>
+
+      <div class="plan-block">
+        <div class="block-label">Current Plan</div>
+        <div class="plan-row">
+          <div class="plan-name-text" id="c_plan">声紋カルテ　基本プラン</div>
+        </div>
+        <div class="plan-row">
+          <div style="font-size:10px;color:var(--silver);font-weight:200;letter-spacing:1px;">翌月ご請求額</div>
+          <div>
+            <span class="plan-amount-text" id="c_amount">7,800</span>
+            <span class="plan-amount-unit">円（税込）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="delivery-block">
+        <div class="block-label">Next Month Delivery</div>
+        <div class="delivery-grid">
+          <div class="delivery-item">
+            <div class="di-label">翌月納品予定</div>
+            <div class="di-val hi" id="c_next">8<span>本</span></div>
+          </div>
+          <div class="delivery-item">
+            <div class="di-label">今月の残枠</div>
+            <div class="di-val" id="c_remain">—<span>本</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reminder-block">
+        <div class="block-label">Order Reminder — 発注のお願い</div>
+        <div class="reminder-text" id="c_reminder_text">
+          出勤日記は<strong>前日中にLINEでご連絡</strong>いただけると助かります。<br>
+          当日の急ぎ対応はプランの都合上お受けできない場合があります。
+        </div>
+        <div class="reminder-example" id="c_reminder_example">
+          例）「明日18時から出勤予定です」<br>
+          例）「今週の出勤スケジュールをまとめて送ります」
+        </div>
+      </div>
+
+      <div class="payment-block" id="c_payment_block">
+        <div class="block-label">Payment</div>
+        <div class="payment-text" id="c_payment_text">
+          引き続きご利用いただける場合は、<br>
+          <strong>月末までにPayPay請求書よりお支払い</strong>をお願いします。<br>
+          確認後、翌月分の代筆をスタートします。
+        </div>
+        <div class="payment-note">
+          ※ ご入金確認後に翌月の代筆をスタートします。<br>
+          ※ ご不明点はLINEにてお気軽にご連絡ください。
+        </div>
+      </div>
+
+      <div class="upsell-block" id="c_upsell">
+        <div class="block-label">Option — ご検討はお気軽に</div>
+        <div class="upsell-item" id="u_wishlist">
+          <div class="upsell-tag">Wishlist</div>
+          <div class="upsell-text"><strong>おねだりリスト（＋2,000円〜）</strong><br>高単価客への自然な誘導文を日記に組み込みます。</div>
+        </div>
+        <div class="upsell-item" id="u_upgrade">
+          <div class="upsell-tag">Upgrade</div>
+          <div class="upsell-text" id="u_upgrade_text"><strong>スタンダードプランへ（25,000円・月20本）</strong><br>本数を増やして指名・単価の底上げを狙えます。</div>
+        </div>
+        <div class="upsell-item" id="u_sns">
+          <div class="upsell-tag">SNS</div>
+          <div class="upsell-text"><strong>SNS投稿文オプション</strong><br>X・Instagramの投稿文も合わせてお任せいただけます。</div>
+        </div>
+        <div class="upsell-item" id="u_referral" style="display:none">
+          <div class="upsell-tag">紹介</div>
+          <div class="upsell-text"><strong>お友達紹介プラン</strong><br>知り合いのキャストをご紹介いただくと翌月スタンダード相当に。紹介された方も初月7,800円でスタート。</div>
+        </div>
+      </div>
+
+      <div class="gold-line"></div>
+      <div class="card-footer">
+        <div class="footer-brand">LUNA carte</div>
+        <div class="footer-copy">Onside Inc. — あなたの言葉を、最後まで私が書きます。</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const planAmounts = {
+  '声紋カルテ　基本プラン': '7,800', '声紋カルテ　スタンダード': '25,000',
+  '声紋カルテ　プレミアム': '40,000', 'ペルソナ設計　エントリー': '50,000',
+  'ペルソナ設計　プロ': '80,000', 'ペルソナ設計　エグゼクティブ': '120,000',
+};
+const planCounts = {
+  '声紋カルテ　基本プラン': '8', '声紋カルテ　スタンダード': '20',
+  '声紋カルテ　プレミアム': '40', 'ペルソナ設計　エントリー': '12',
+  'ペルソナ設計　プロ': '20', 'ペルソナ設計　エグゼクティブ': '40',
+};
+const upgradeText = {
+  '声紋カルテ　基本プラン': '<strong>スタンダードプランへ（25,000円・月20本）</strong><br>本数を増やして指名・単価の底上げを狙えます。',
+  '声紋カルテ　スタンダード': '<strong>プレミアムプランへ（40,000円・月40本）</strong><br>SNS代行付帯。当日3時間以内納品で機会損失をゼロに。',
+  '声紋カルテ　プレミアム': '<strong>ペルソナ設計プランへ（50,000円〜）</strong><br>演出型の戦略設計で、さらなる単価アップを目指せます。',
+  'ペルソナ設計　エントリー': '<strong>ペルソナ設計プロへ（80,000円・月20本）</strong><br>月1戦略会議と時間外対応で、売上最大化を伴走します。',
+  'ペルソナ設計　プロ': '<strong>ペルソナ設計エグゼクティブへ（120,000円・月40本）</strong><br>週1フィードバック＋SNS代行。売上を本気で作ります。',
+  'ペルソナ設計　エグゼクティブ': '<strong>コンサルプランのご相談（応相談）</strong><br>個別戦略パートナーとして、ビジネス設計からお手伝いします。',
+};
+const reminderText = {
+  '声紋カルテ　基本プラン': '出勤日記は<strong>前日中にLINEでご連絡</strong>いただけると助かります。<br>当日の急ぎ対応はプランの都合上お受けできない場合があります。',
+  '声紋カルテ　スタンダード': '出勤日記は<strong>前日中のご連絡</strong>が一番スムーズです。<br>当日ご連絡の場合は翌朝までの納品となります。',
+  '声紋カルテ　プレミアム': '出勤の<strong>3時間前までにLINEでご連絡</strong>ください。<br>ご連絡後3時間以内に納品いたします。',
+  'ペルソナ設計　エントリー': '出勤の<strong>3時間前までにLINEでご連絡</strong>ください。<br>ご連絡後3時間以内に納品いたします。',
+  'ペルソナ設計　プロ': '出勤の<strong>1時間前までにご連絡</strong>いただければ対応します。<br>時間外のご連絡もプラン内で対応しています。',
+  'ペルソナ設計　エグゼクティブ': '出勤の<strong>1時間前までにご連絡</strong>いただければ対応します。<br>時間外・急ぎのご連絡もプラン内で対応しています。',
+};
+const reminderExample = {
+  '声紋カルテ　基本プラン': '例）「明日18時から出勤予定です」<br>例）「今週の出勤スケジュールをまとめて送ります」',
+  '声紋カルテ　スタンダード': '例）「明日19時から出勤します」<br>例）「今週の出勤予定を先にまとめて送ります」',
+  '声紋カルテ　プレミアム': '例）「今日21時から出勤します（3時間前）」<br>例）「今夜の分、お願いします」',
+  'ペルソナ設計　エントリー': '例）「今日21時から出勤します（3時間前）」<br>例）「今夜の分、お願いします」',
+  'ペルソナ設計　プロ': '例）「今夜22時から出勤します（1時間前）」<br>例）「急ぎで1本お願いしたいです」',
+  'ペルソナ設計　エグゼクティブ': '例）「今夜22時から出勤します（1時間前）」<br>例）「急ぎで1本お願いしたいです」',
+};
+const paymentText = {
+  paypay: '引き続きご利用いただける場合は、<br><strong>月末までにPayPay請求書よりお支払い</strong>をお願いします。<br>確認後、翌月分の代筆をスタートします。',
+  stripe: '引き続きご利用いただける場合は、<br><strong>お送りする決済リンクよりお手続き</strong>をお願いします。<br>クレジットカード・Apple Payがご利用いただけます。',
+  both:   '引き続きご利用いただける場合は、<br><strong>PayPay</strong>または<strong>クレジットカード（Stripe）</strong>にてお支払いをお願いします。<br>ご都合のよい方法をお選びください。',
+};
+
+// プラン変更時に金額・本数を自動セット
+document.getElementById('inp_plan').addEventListener('change', function() {
+  document.getElementById('inp_amount').value = planAmounts[this.value] || '';
+  document.getElementById('inp_next_count').value = planCounts[this.value] || '';
+  update();
+});
+
+// すべての入力にリアルタイム反映を設定
+['inp_month','inp_name','inp_plan','inp_amount','inp_next_count','inp_remain','inp_payment'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+});
+['up_wishlist','up_upgrade','up_sns','up_referral'].forEach(id => {
+  document.getElementById(id).addEventListener('change', update);
+});
+
+function update() {
+  const month   = document.getElementById('inp_month').value || '2026.04';
+  const name    = document.getElementById('inp_name').value || '◯◯';
+  const plan    = document.getElementById('inp_plan').value;
+  const amount  = document.getElementById('inp_amount').value || '—';
+  const next    = document.getElementById('inp_next_count').value || '—';
+  const remain  = document.getElementById('inp_remain').value || '—';
+  const payment = document.getElementById('inp_payment').value;
+
+  document.getElementById('c_month').textContent = `LUNA carte — ${month} Monthly`;
+  document.getElementById('c_name').textContent = name;
+  document.getElementById('c_plan').textContent = plan;
+  document.getElementById('c_amount').textContent = amount;
+  document.getElementById('c_next').innerHTML = next + '<span>本</span>';
+  document.getElementById('c_remain').innerHTML = remain + '<span>本</span>';
+  document.getElementById('c_reminder_text').innerHTML = reminderText[plan] || '';
+  document.getElementById('c_reminder_example').innerHTML = reminderExample[plan] || '';
+  document.getElementById('c_payment_text').innerHTML = paymentText[payment] || paymentText.paypay;
+
+  // アップセル表示制御
+  document.getElementById('u_wishlist').style.display = document.getElementById('up_wishlist').checked ? 'flex' : 'none';
+  document.getElementById('u_sns').style.display = document.getElementById('up_sns').checked ? 'flex' : 'none';
+  document.getElementById('u_referral').style.display = document.getElementById('up_referral').checked ? 'flex' : 'none';
+  const showUpgrade = document.getElementById('up_upgrade').checked;
+  document.getElementById('u_upgrade').style.display = showUpgrade ? 'flex' : 'none';
+  if (showUpgrade) document.getElementById('u_upgrade_text').innerHTML = upgradeText[plan] || '';
+
+  const anyUpsell = ['up_wishlist','up_upgrade','up_sns','up_referral'].some(id => document.getElementById(id).checked);
+  document.getElementById('c_upsell').style.display = anyUpsell ? 'block' : 'none';
+}
+
+function savePng() {
+  const btn = document.getElementById('pngBtn');
+  btn.disabled = true;
+  btn.textContent = '生成中...';
+  html2canvas(document.getElementById('card'), {
+    backgroundColor: '#162236', scale: 2, useCORS: true, logging: false
+  }).then(canvas => {
+    const name  = document.getElementById('inp_name').value || 'cast';
+    const month = document.getElementById('inp_month').value || '2026.04';
+    const a = document.createElement('a');
+    a.download = `lunacarte_monthly_${name}_${month}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    btn.disabled = false;
+    btn.textContent = 'PNG 保存';
+  }).catch(() => {
+    btn.disabled = false;
+    btn.textContent = 'PNG 保存';
+  });
+}
+
+// 初期表示
+update();
+</script>
+</body>
+</html>
