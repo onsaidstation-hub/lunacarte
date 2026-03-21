@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LUNA carte｜お友達紹介ページ</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #162236;
+    --navy-light: #1e3352;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --silver: #b8c4d0;
+    --silver-light: #dce6f0;
+    --white: #f9f5ee;
+    --text: #f0ece3;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    padding: 56px 24px 48px;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(201,168,76,0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.1);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    letter-spacing: 5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 20px;
+  }
+
+  .hero-moon {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 20px;
+    opacity: 0.6;
+  }
+
+  .hero-friend-badge {
+    display: inline-block;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold-light);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 5px 16px;
+    margin-bottom: 24px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 1px;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+  .hero-title em {
+    font-style: normal;
+    color: var(--gold-light);
+  }
+
+  .hero-sub {
+    font-size: 13px;
+    color: var(--silver);
+    line-height: 1.9;
+    letter-spacing: 0.5px;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* ===== GOLD LINE ===== */
+  .gold-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold-light) 50%, var(--gold) 70%, transparent);
+    opacity: 0.4;
+  }
+
+  /* ===== SECTION ===== */
+  section { padding: 36px 24px; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .section-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 20px;
+  }
+
+  /* ===== WHAT IS ===== */
+  .what-text {
+    font-size: 14px;
+    line-height: 2;
+    color: var(--silver-light);
+    letter-spacing: 0.5px;
+  }
+  .what-text strong {
+    color: var(--white);
+    font-weight: 500;
+  }
+  .what-highlight {
+    margin-top: 20px;
+    background: rgba(201,168,76,0.06);
+    border-left: 2px solid rgba(201,168,76,0.5);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--silver-light);
+    line-height: 2;
+  }
+  .what-highlight strong { color: var(--gold-light); font-weight: 500; }
+
+  /* ===== 紹介特典 ===== */
+  .bonus-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bonus-card {
+    background: rgba(13,27,42,0.6);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 20px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bonus-card::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.06), transparent 70%);
+  }
+  .bonus-card-tag {
+    display: inline-block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 2px 8px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .bonus-card-who {
+    font-size: 12px;
+    color: var(--silver);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    font-weight: 300;
+  }
+  .bonus-card-main {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 1px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .bonus-card-main em {
+    font-style: normal;
+    color: var(--gold-light);
+  }
+  .bonus-card-desc {
+    font-size: 12px;
+    color: var(--silver);
+    line-height: 1.9;
+    letter-spacing: 0.3px;
+    opacity: 0.8;
+  }
+
+  /* ===== HOW TO ===== */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(184,196,208,0.07);
+    position: relative;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: rgba(201,168,76,0.25);
+    line-height: 1;
+    min-width: 28px;
+    margin-top: -2px;
+  }
+  .step-content {}
+  .step-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .step-desc {
+    font-size: 12px;
+    color: var(--silver);
+    line-height: 1.9;
+    opacity: 0.8;
+  }
+
+  /* ===== PLAN PREVIEW ===== */
+  .plan-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid rgba(201,168,76,0.18);
+  }
+  .plan-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(13,27,42,0.5);
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+  .plan-item:last-child { border-bottom: none; }
+  .plan-item-name {
+    font-size: 12px;
+    color: var(--silver-light);
+    letter-spacing: 0.5px;
+  }
+  .plan-item-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--gold-light);
+  }
+  .plan-item-price span {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 10px;
+    color: var(--silver);
+    margin-left: 2px;
+    font-weight: 300;
+  }
+  .plan-intro-note {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(201,168,76,0.07);
+    border: 1px solid rgba(201,168,76,0.2);
+    font-size: 12px;
+    color: var(--gold-light);
+    line-height: 1.9;
+    letter-spacing: 0.3px;
+  }
+
+  /* ===== CTA ===== */
+  .cta-section {
+    padding: 40px 24px 56px;
+    text-align: center;
+  }
+  .cta-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--white);
+    letter-spacing: 1px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .cta-sub {
+    font-size: 12px;
+    color: var(--silver);
+    line-height: 1.9;
+    margin-bottom: 28px;
+    letter-spacing: 0.3px;
+    opacity: 0.8;
+  }
+  .cta-btn {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 14px;
+    padding: 18px 24px;
+    background: var(--gold);
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-align: center;
+    transition: background 0.2s, transform 0.1s;
+    border: none;
+    cursor: pointer;
+  }
+  .cta-btn:hover { background: var(--gold-light); }
+  .cta-btn:active { transform: scale(0.98); }
+
+  .cta-note {
+    font-size: 11px;
+    color: var(--silver);
+    opacity: 0.5;
+    letter-spacing: 0.5px;
+    line-height: 1.9;
+  }
+
+  /* ===== FOOTER ===== */
+  .lp-footer {
+    padding: 20px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(201,168,76,0.1);
+  }
+  .lp-footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    letter-spacing: 6px;
+    color: var(--gold);
+    opacity: 0.55;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .lp-footer-copy {
+    font-size: 10px;
+    color: var(--silver);
+    opacity: 0.3;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <svg class="hero-moon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M28 8C22 10 18 16 18 22C18 28 22 34 28 36C22 38 14 34 10 28C6 22 8 14 14 10C18 7 24 7 28 8Z" fill="#c9a84c"/>
+  </svg>
+  <div class="hero-eyebrow">LUNA carte</div>
+  <div class="hero-friend-badge">お友達紹介ページ</div>
+  <h1 class="hero-title">
+    友だちから聞いて<br>
+    気になってくれたなら、<br>
+    <em>まず見てみてください。</em>
+  </h1>
+  <p class="hero-sub">
+    キャストの写メ日記・出勤日記を<br>
+    丸ごと代筆してくれるサービスです。<br>
+    紹介された方は<strong style="color:var(--gold-light);">初月7,800円</strong>でスタートできます。
+  </p>
+</div>
+
+<div class="gold-line"></div>
+
+<!-- WHAT IS -->
+<section>
+  <div class="section-label">LUNA carte とは</div>
+  <p class="what-text">
+    出勤前に一言LINEするだけで、<br>
+    <strong>写メ日記・出勤日記を代わりに書いてくれる</strong><br>
+    キャスト専用の代筆サービスです。
+  </p>
+  <p class="what-text" style="margin-top:14px;">
+    文章が苦手でも、毎日更新できる。<br>
+    日記の質が上がると、<strong>指名・単価が変わります。</strong>
+  </p>
+  <div class="what-highlight">
+    使ってる子は「<strong>日記を書く時間がなくなった</strong>」じゃなくて<br>
+    「<strong>書いてもらえるから余裕ができた</strong>」って感じが多いみたいです。
+  </div>
+</section>
+
+<!-- 紹介特典 -->
+<section>
+  <div class="section-label">紹介特典</div>
+  <div class="bonus-cards">
+
+    <div class="bonus-card">
+      <div class="bonus-card-tag">あなたへ</div>
+      <div class="bonus-card-who">紹介してくれた方</div>
+      <div class="bonus-card-main">
+        翌月も<em>今の料金のまま</em><br>
+        スタンダード相当（月20本）に
+      </div>
+      <div class="bonus-card-desc">
+        友だちが課金した時点で自動的に適用されます。<br>
+        手続き・申請は一切不要です。
+      </div>
+    </div>
+
+    <div class="bonus-card">
+      <div class="bonus-card-tag">あなたへも</div>
+      <div class="bonus-card-who">紹介された方（このページを見てる方）</div>
+      <div class="bonus-card-main">
+        初月<em>7,800円</em>で<br>
+        スタンダード体験ボーナス付き
+      </div>
+      <div class="bonus-card-desc">
+        通常スタンダードは25,000円ですが、<br>
+        初月は7,800円で20本分の代筆をお届けします。<br>
+        まず使ってみて、合うかどうか確かめてください。
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW TO -->
+<section>
+  <div class="section-label">どうやって使うの？</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">申し込みフォームを送信</div>
+        <div class="step-desc">このページ下のボタンから申し込み。<br>名前とプランを選ぶだけです。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">LINEでご連絡します</div>
+        <div class="step-desc">担当からLINEで連絡がきます。<br>契約書の確認・決済をお願いします。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">あなたのカルテを作ります</div>
+        <div class="step-desc">口癖・文体・キャラクターをヒアリングして<br>あなたらしい文体で書きます。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">出勤前にLINEするだけ</div>
+        <div class="step-desc">「今日21時から出勤します」と送れば<br>出勤日記が届きます。それだけです。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section>
+  <div class="section-label">料金プラン</div>
+  <div class="plan-list">
+    <div class="plan-item">
+      <div class="plan-name">基本プラン　月8本</div>
+      <div class="plan-item-price">7,800<span>円/月</span></div>
+    </div>
+    <div class="plan-item">
+      <div class="plan-name">スタンダード　月20本</div>
+      <div class="plan-item-price">25,000<span>円/月</span></div>
+    </div>
+    <div class="plan-item">
+      <div class="plan-name">プレミアム　月40本</div>
+      <div class="plan-item-price">40,000<span>円/月</span></div>
+    </div>
+    <div class="plan-item">
+      <div class="plan-name">ペルソナ設計　エントリー</div>
+      <div class="plan-item-price">50,000<span>円/月</span></div>
+    </div>
+  </div>
+  <div class="plan-intro-note">
+    ✦ 紹介された方は初月7,800円でスタンダード体験（月20本）からお試しいただけます。
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2 class="cta-title">気になったら、<br>まず申し込んでみてください。</h2>
+  <p class="cta-sub">
+    申し込み後にこちらからLINEします。<br>
+    無理な勧誘は一切しません。
+  </p>
+  <a class="cta-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdttXH3x4cymCWkpCuTLObmPRp8fJbtAhp0pZYdpZ4ecYZx_w/viewform?usp=header" target="_blank">
+    申し込みフォームへ（無料）
+  </a>
+  <p class="cta-note">
+    対応時間：12:00〜翌5:00<br>
+    運営：LUNA carte / Onside
+  </p>
+</div>
+
+<div class="gold-line"></div>
+
+<div class="lp-footer">
+  <div class="lp-footer-brand">LUNA carte</div>
+  <div class="lp-footer-copy">Onside — あなたの言葉を、最後まで私が書きます。</div>
+</div>
+
+</body>
+</html>
